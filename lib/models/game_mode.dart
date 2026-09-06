@@ -4,7 +4,7 @@ enum GameMode {
   classic(
     'Classic',
     'Her parça yerini bulur.',
-    'Silüeti 7 parçayla tamamla. Kendi hızında, adım adım.',
+    'Silüeti parçalarla tamamla. Kendi hızında, adım adım.',
     Color(0xFF60DDC2),
     Icons.category_outlined,
   ),
@@ -13,7 +13,7 @@ enum GameMode {
     'Az hamle. Büyük fikir.',
     'Yanlış yerleşmiş parçaları en az hamlede düzelt.',
     Color(0xFFFFBD76),
-    Icons.alt_route_rounded,
+    Icons.change_history_rounded,
   ),
   memory(
     'Memory',

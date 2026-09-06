@@ -69,11 +69,16 @@ void main() {
       expect(find.text('BAŞLANGIÇ'), findsOneWidget);
       await tester.tap(find.text('01'));
       await tester.pumpAndSettle();
-      expect(find.text('Oyun alanı önizlemesi'), findsOneWidget);
+      expect(
+        find.text(
+          mode == GameMode.classic ? 'Eve hoş geldin' : 'Oyun alanı önizlemesi',
+        ),
+        findsOneWidget,
+      );
       expect(store.lastMode, mode);
-      await tester.pageBack();
+      await tester.tap(find.byTooltip('Geri dön'));
       await tester.pumpAndSettle();
-      await tester.pageBack();
+      await tester.tap(find.byTooltip('Geri dön'));
       await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
       expect(tester.takeException(), isNull);

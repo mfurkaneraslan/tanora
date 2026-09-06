@@ -24,7 +24,9 @@ Android cihaz/emülatör için `flutter run`; iOS için macOS, Xcode ve iOS ara�
 - Kayıt okuma/yazma hatasında açıklama gösterilir; uygulama açık kalır.
 - Daily, hesap, backend, uzaktan kayıt ve database yok.
 
-Bu birinci aşama menü/gezinti iskeletidir. 30 yuva, 30 tasarlanmış bulmaca anlamına gelmez. Oyun ekranı açıkça önizlemedir; sürükleme, döndürme, snap, çözüm kontrolü, Memory sayacı ve Minimal Moves puanlama henüz eklenmemiştir. Sahte tamamla butonu yoktur. `ProgressStore.complete` sonraki oyun motorunun doğruladığı sonuçları kaydetmek için hazırdır.
+Classic artık oynanabilir: ilk ev silüeti 3 üçgenle tamamlanır. Sonraki bölümlerde aynı silüetin en büyük üçgeni ikiye bölünür; bölüm 2'de 4, bölüm 30'da 32 parça vardır. Parçalar alttaki tepsiden sürüklenir, tutulunca gerçek boyutuna gelir ve hedefe 22 mantıksal piksel yaklaşınca oturur. Yanlış bırakılan parça tepsiye döner. Bu başlangıç serisinde döndürme yoktur.
+
+Tüm parçalar yerleşince sonuç yerel kayda yazılır: hatasız 3 yıldız, en fazla 3 ek hamle 2 yıldız, daha fazlası 1 yıldız. Sonraki bölüm açılır. Minimal Moves ve Memory henüz önizlemedir. Gezinme düğmelerinde tangram üçgeni kullanılır.
 
 Önceki konuşmadan görsel ek alınamadığından tasarım metindeki koyu lacivert + canlı renkler tarifinden oluşturuldu. Çizimler Flutter CustomPainter ile üretilir; harici görsel/font indirme gerekmez. Mobil uygulama çalışma sırasında ağ servisine ihtiyaç duymaz. Web önizlemesinin ilk yüklenmesi sunucu gerektirir; PWA/offline web desteği bu kapsamda değildir.
 
@@ -56,13 +58,13 @@ flutter test
 flutter build web --release
 ```
 
-6 test geçti: kayıt tekrar yükleme, mod izolasyonu, en iyi skorun korunması, kilitli bölüme erişim reddi, bozuk/yazılamayan kayıt, her üç modun ileri/geri gezinmesi ve 320 px ekranda büyütülmüş yazı. Tarayıcıda 390 × 844 boyutunda ana menü ve bölüm ekranı görsel olarak kontrol edildi.
+9 test geçti; Classic geometri bütünlüğü, 30 bölümün çözülebilirliği, yanlış bırakma ve gerçek sürüklemeyle tamamlama da doğrulandı. Önceki kontroller: kayıt tekrar yükleme, mod izolasyonu, en iyi skorun korunması, kilitli bölüme erişim reddi, bozuk/yazılamayan kayıt, her üç modun ileri/geri gezinmesi ve 320 px ekranda büyütülmüş yazı. Tarayıcıda 390 × 844 boyutunda ana menü ve bölüm ekranı görsel olarak kontrol edildi.
 
 Yerel kayıt için SharedPreferencesAsync kullanılır: https://pub.dev/documentation/shared_preferences/latest/shared_preferences/SharedPreferencesAsync-class.html . Uygulama kaldırılması veya tarayıcı verilerinin temizlenmesi ilerlemeyi silebilir; cihazlar arası senkronizasyon yoktur.
 
 ## Sonraki aşama
 
-Gerçek yedi parça geometrisi ve bölüm verileri, sürükleme/döndürme, snap ve çözüm doğrulaması; ardından moda göre başlangıç yerleşimi, hamle sayacı, Memory gösterim süresi ve sonuç ekranı.
+Yeni silüetler, isteğe bağlı döndürme ve Minimal Moves / Memory oyun mekanikleri.
 
 ## GitHub Pages
 

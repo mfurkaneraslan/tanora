@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/progress_store.dart';
 import '../models/game_mode.dart';
 import '../widgets/tangram_art.dart';
+import '../widgets/tangram_play.dart';
 import 'level_select_screen.dart';
 import 'level_preview_screen.dart';
 
@@ -88,7 +89,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    icon: const Icon(Icons.play_arrow_rounded),
+                    icon: const TangramPlay(),
                     label: Text(
                       'Devam et · ${progress.lastMode!.title} · ${progress.lastLevel.toString().padLeft(2, '0')}',
                     ),
@@ -187,7 +188,7 @@ class _ModeCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_rounded, color: mode.color, size: 21),
+            TangramPlay(color: mode.color, size: 21),
           ],
         ),
       ),

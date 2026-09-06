@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/progress_store.dart';
 import '../models/game_mode.dart';
 import 'level_preview_screen.dart';
+import '../widgets/tangram_play.dart';
 
 class LevelSelectScreen extends StatelessWidget {
   const LevelSelectScreen({
@@ -14,7 +15,7 @@ class LevelSelectScreen extends StatelessWidget {
   final ProgressStore progress;
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(mode.title)),
+    appBar: AppBar(leading: const TangramBack(), title: Text(mode.title)),
     body: Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
