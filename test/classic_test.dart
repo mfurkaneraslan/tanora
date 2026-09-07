@@ -71,7 +71,10 @@ void main() {
       final restored = ProgressStore(preferences: prefs);
       await restored.load();
       expect(restored.unlocked(GameMode.classic, 2), isTrue);
-      await tester.scrollUntilVisible(find.text('Sonraki bölüm · 4 parça'), 150);
+      expect(
+        find.text('Sonraki bölüm · 4 parça').hitTestable(),
+        findsOneWidget,
+      );
       await tester.tap(find.text('Sonraki bölüm · 4 parça'));
       await tester.pumpAndSettle();
       expect(find.text('0 / 4 parça  ·  0 hamle'), findsOneWidget);

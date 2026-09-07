@@ -58,160 +58,157 @@ class _ClassicGameScreenState extends State<ClassicGameScreen> {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
-          child: ListView(
-            physics: active != null
-                ? const NeverScrollableScrollPhysics()
-                : null,
+          child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            children: [
-              const Text(
-                'Eve hoş geldin',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                session.complete
-                    ? 'Bütün parçalar yerini buldu.'
-                    : 'Parçayı tut, silüetteki yerine sürükle.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '${session.placed.length} / ${session.pieces.length} parça  ·  ${session.moves} hamle',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final height = layout.height;
-                  final availableHeight =
-                      (MediaQuery.sizeOf(context).height - 260).clamp(
-                        300.0,
-                        900.0,
-                      );
-                  final boardWidth = constraints.maxWidth.clamp(
-                    0.0,
-                    availableHeight / height * 360,
-                  );
-                  final scale = boardWidth / 360;
-                  return Center(
-                    child: Listener(
-                      key: const ValueKey('classic-board'),
-                      behavior: HitTestBehavior.opaque,
-                      onPointerDown: session.complete
-                          ? null
-                          : (details) {
-                              final p = details.localPosition / scale;
-                              for (
-                                var i = session.pieces.length - 1;
-                                i >= 0;
-                                i--
-                              ) {
-                                if (session.placed.containsKey(i)) continue;
-                                final shape = Path()
-                                  ..addPolygon(
-                                    session.pieces[i].local
-                                        .map((v) => v + tray(i))
-                                        .toList(),
-                                    true,
-                                  );
-                                if (shape.contains(p)) {
-                                  setState(() {
-                                    active = i;
-                                    grabOffset = p - tray(i);
-                                    drag = tray(i);
-                                  });
-                                  break;
-                                }
-                              }
-                            },
-                      onPointerMove: (details) {
-                        if (active != null) {
-                          setState(
-                            () => drag =
-                                details.localPosition / scale - grabOffset,
-                          );
-                        }
-                      },
-                      onPointerUp: (_) {
-                        if (active == null) return;
-                        setState(() {
-                          session.drop(active!, drag);
-                          active = null;
-                        });
-                        if (session.complete) finish();
-                      },
-                      onPointerCancel: (_) => setState(() => active = null),
-                      child: Semantics(
-                        label:
-                            'Ev silüeti. ${session.pieces.length} sürüklenebilir üçgen.',
-                        child: CustomPaint(
-                          size: Size(boardWidth, height * scale),
-                          painter: _Board(session, active, drag, tray),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              if (!session.complete)
+            child: Column(
+              children: [
                 const Text(
-                  'Parçalar gerçek boyutunda. Yaklaşınca yerine oturur.\nBu başlangıç serisinde döndürmen gerekmiyor.',
+                  'Eve hoş geldin',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12),
-                ),
-              if (session.complete) ...[
-                Text(
-                  'Bölüm tamamlandı',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: GameMode.classic.color,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  saving
-                      ? 'Kaydediliyor…'
-                      : '${widget.progress.stars(GameMode.classic, widget.level)} / 3 yıldız',
+                  session.complete
+                      ? 'Bütün parçalar yerini buldu.'
+                      : 'Parçayı tut, silüetteki yerine sürükle.',
                   textAlign: TextAlign.center,
                 ),
-                if (widget.progress.error != null)
-                  Text(widget.progress.error!, textAlign: TextAlign.center),
                 const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: saving
-                      ? null
-                      : () async {
-                          if (widget.level == 30) {
-                            Navigator.of(context).pop();
-                            return;
-                          }
-                          await widget.progress.select(
-                            GameMode.classic,
-                            widget.level + 1,
-                          );
-                          if (!context.mounted) return;
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute<void>(
-                              builder: (_) => ClassicGameScreen(
-                                level: widget.level + 1,
-                                progress: widget.progress,
-                              ),
+                Text(
+                  '${session.placed.length} / ${session.pieces.length} parça  ·  ${session.moves} hamle',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final height = layout.height;
+                      final availableHeight = constraints.maxHeight;
+                      final boardWidth = constraints.maxWidth.clamp(
+                        0.0,
+                        availableHeight / height * 360,
+                      );
+                      final scale = boardWidth / 360;
+                      return Center(
+                        child: Listener(
+                          key: const ValueKey('classic-board'),
+                          behavior: HitTestBehavior.opaque,
+                          onPointerDown: session.complete
+                              ? null
+                              : (details) {
+                                  final p = details.localPosition / scale;
+                                  for (
+                                    var i = session.pieces.length - 1;
+                                    i >= 0;
+                                    i--
+                                  ) {
+                                    if (session.placed.containsKey(i)) continue;
+                                    final shape = Path()
+                                      ..addPolygon(
+                                        session.pieces[i].local
+                                            .map((v) => v + tray(i))
+                                            .toList(),
+                                        true,
+                                      );
+                                    if (shape.contains(p)) {
+                                      setState(() {
+                                        active = i;
+                                        grabOffset = p - tray(i);
+                                        drag = tray(i);
+                                      });
+                                      break;
+                                    }
+                                  }
+                                },
+                          onPointerMove: (details) {
+                            if (active != null) {
+                              setState(
+                                () => drag =
+                                    details.localPosition / scale - grabOffset,
+                              );
+                            }
+                          },
+                          onPointerUp: (_) {
+                            if (active == null) return;
+                            setState(() {
+                              session.drop(active!, drag);
+                              active = null;
+                            });
+                            if (session.complete) finish();
+                          },
+                          onPointerCancel: (_) => setState(() => active = null),
+                          child: Semantics(
+                            label:
+                                'Ev silüeti. ${session.pieces.length} sürüklenebilir üçgen.',
+                            child: CustomPaint(
+                              size: Size(boardWidth, height * scale),
+                              painter: _Board(session, active, drag, tray),
                             ),
-                          );
-                        },
-                  icon: const TangramPlay(color: Color(0xFF0C1226)),
-                  label: Text(
-                    widget.level == 30
-                        ? 'Bölümlere dön'
-                        : 'Sonraki bölüm · ${session.pieces.length + 1} parça',
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
+                if (!session.complete)
+                  const Text(
+                    'Parçalar gerçek boyutunda. Yaklaşınca yerine oturur.\nBu başlangıç serisinde döndürmen gerekmiyor.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12),
+                  ),
+                if (session.complete) ...[
+                  Text(
+                    'Bölüm tamamlandı',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: GameMode.classic.color,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    saving
+                        ? 'Kaydediliyor…'
+                        : '${widget.progress.stars(GameMode.classic, widget.level)} / 3 yıldız',
+                    textAlign: TextAlign.center,
+                  ),
+                  if (widget.progress.error != null)
+                    Text(widget.progress.error!, textAlign: TextAlign.center),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: saving
+                        ? null
+                        : () async {
+                            if (widget.level == 30) {
+                              Navigator.of(context).pop();
+                              return;
+                            }
+                            await widget.progress.select(
+                              GameMode.classic,
+                              widget.level + 1,
+                            );
+                            if (!context.mounted) return;
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute<void>(
+                                builder: (_) => ClassicGameScreen(
+                                  level: widget.level + 1,
+                                  progress: widget.progress,
+                                ),
+                              ),
+                            );
+                          },
+                    icon: const TangramPlay(color: Color(0xFF0C1226)),
+                    label: Text(
+                      widget.level == 30
+                          ? 'Bölümlere dön'
+                          : 'Sonraki bölüm · ${session.pieces.length + 1} parça',
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

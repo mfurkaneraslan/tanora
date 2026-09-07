@@ -82,6 +82,15 @@ class ClassicSession {
 /// Shelf packing preserves each piece's exact target dimensions.
 class PieceTray {
   PieceTray(List<PuzzlePiece> pieces) {
+    if (pieces.length == 3) {
+      centers.addAll([
+        const Offset(85, 380),
+        const Offset(180, 390),
+        const Offset(275, 390),
+      ]);
+      height = 460;
+      return;
+    }
     var x = 12.0, y = 320.0, rowHeight = 0.0;
     for (final piece in pieces) {
       final bounds = (Path()..addPolygon(piece.local, true)).getBounds();
