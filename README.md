@@ -74,3 +74,5 @@ Kaynak depo: https://github.com/mfurkaneraslan/tanora
 Pages yayını `gh-pages` dalının kök dizininden yapılır. `main` Flutter kaynaklarını içerir. Yayını güncellemeden önce testleri çalıştırın ve `flutter build web --release --base-href /tanora/` ile derleyin; `build/web` içeriğini `.nojekyll` dosyasıyla birlikte `gh-pages` dalına yayınlayın. Yalnızca `main` dalını güncellemek canlı sürümü değiştirmez.
 
 Görünen ürün adı TANORA olarak yenilendi. Mevcut yerel kayıtları korumak için dahili `tangram.progress.v1` kayıt anahtarı değişmedi.
+
+Web derlemesinden sonra `python tool/version_web.py` çalıştırın. Bu adım ana uygulama ve yükleyici dosyalarına içerik bazlı ad verir; eski tarayıcı önbelleğinin farklı sürümleri karıştırmasını önler.
