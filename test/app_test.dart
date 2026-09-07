@@ -69,10 +69,7 @@ void main() {
       expect(find.text('BAŞLANGIÇ'), findsOneWidget);
       await tester.tap(find.text('01'));
       await tester.pumpAndSettle();
-      expect(
-        find.text(mode == GameMode.classic ? 'Ev' : 'Oyun alanı önizlemesi'),
-        findsOneWidget,
-      );
+      expect(find.text('Ev'), findsOneWidget);
       expect(store.lastMode, mode);
       await tester.tap(find.byTooltip('Geri dön'));
       await tester.pumpAndSettle();
@@ -92,8 +89,8 @@ void main() {
     await tester.pumpWidget(
       TanoraApp(progress: ProgressStore(preferences: MemoryPreferences())),
     );
-    await tester.scrollUntilVisible(find.text('Memory'), 200);
-    await tester.tap(find.text('Memory'));
+    await tester.scrollUntilVisible(find.text('Hafıza'), 200);
+    await tester.tap(find.text('Hafıza'));
     await tester.pumpAndSettle();
     expect(find.text('BAŞLANGIÇ'), findsOneWidget);
     expect(tester.takeException(), isNull);

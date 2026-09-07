@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+
+import '../models/play_session.dart';
 
 import '../data/progress_store.dart';
 import '../models/classic_puzzle.dart';
@@ -12,7 +16,9 @@ class ClassicGameScreen extends StatefulWidget {
     super.key,
     required this.level,
     required this.progress,
+    this.mode = GameMode.classic,
   });
+  final GameMode mode;
   final int level;
   final ProgressStore progress;
   @override
@@ -23,7 +29,13 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController snapGlow;
   int? glowPiece;
-  late ClassicSession session;
+  late PlaySession session;
+  Timer? memoryTimer;
+  int countdown = 3;
+  bool studying = false;
+  bool peeking = false;
+  bool get showTarget =>
+      widget.mode != GameMode.memory || studying || peeking || session.complete;
   late PieceTray layout;
   Offset grabOffset = Offset.zero;
   int? active;
@@ -39,27 +51,51 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
         )..addListener(() {
           setState(() {});
         });
-    session = ClassicSession(widget.level);
+    session = PlaySession(widget.level, widget.mode);
+    studying = widget.mode == GameMode.memory;
+    if (studying) {
+      memoryTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (!mounted) {
+          timer.cancel();
+          return;
+        }
+        setState(() {
+          countdown--;
+          if (countdown == 0) {
+            studying = false;
+            timer.cancel();
+          }
+        });
+      });
+    }
     layout = PieceTray(session.pieces);
   }
 
   @override
   void dispose() {
+    memoryTimer?.cancel();
     snapGlow.dispose();
     super.dispose();
   }
 
-  Offset tray(int i) => layout.centers[i];
+  Offset tray(int i) => session.positions[i]!;
+
+  void peek() {
+    if (studying || peeking || session.complete) return;
+    setState(() {
+      session.peeks++;
+      peeking = true;
+    });
+    memoryTimer?.cancel();
+    memoryTimer = Timer(const Duration(seconds: 1), () {
+      if (mounted) setState(() => peeking = false);
+    });
+  }
 
   Future<void> finish() async {
     setState(() => saving = true);
-    final extra = session.moves - session.pieces.length;
-    final score = extra == 0
-        ? 3
-        : extra <= 3
-        ? 2
-        : 1;
-    await widget.progress.complete(GameMode.classic, widget.level, score);
+    final score = session.score;
+    await widget.progress.complete(widget.mode, widget.level, score);
     if (!mounted) return;
     setState(() => saving = false);
     final next = await showDialog<bool>(
@@ -104,8 +140,8 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
                   textAlign: TextAlign.center,
                 ),
                 if (widget.level == 30)
-                  const Text(
-                    'Classic serisini bitirdin!',
+                  Text(
+                    '${widget.mode.title} serisini bitirdin!',
                     textAlign: TextAlign.center,
                   ),
                 if (widget.progress.error != null)
@@ -131,11 +167,12 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
     );
     if (!mounted) return;
     if (next == true) {
-      await widget.progress.select(GameMode.classic, widget.level + 1);
+      await widget.progress.select(widget.mode, widget.level + 1);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
           builder: (_) => ClassicGameScreen(
+            mode: widget.mode,
             level: widget.level + 1,
             progress: widget.progress,
           ),
@@ -146,10 +183,8 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
       navigator.popUntil((route) => route.isFirst);
       navigator.push(
         MaterialPageRoute<void>(
-          builder: (_) => LevelSelectScreen(
-            mode: GameMode.classic,
-            progress: widget.progress,
-          ),
+          builder: (_) =>
+              LevelSelectScreen(mode: widget.mode, progress: widget.progress),
         ),
       );
     }
@@ -159,7 +194,9 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       leading: const TangramBack(),
-      title: Text('Classic · ${widget.level.toString().padLeft(2, '0')}'),
+      title: Text(
+        '${widget.mode.title} · ${widget.level.toString().padLeft(2, '0')}',
+      ),
     ),
     body: SafeArea(
       child: Center(
@@ -170,7 +207,9 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
             child: Column(
               children: [
                 Text(
-                  session.shape.name,
+                  widget.mode == GameMode.memory && !showTarget
+                      ? 'Şekli hatırla'
+                      : session.shape.name,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold),
                 ),
@@ -178,6 +217,12 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
                 Text(
                   session.complete
                       ? 'Bütün parçalar yerini buldu.'
+                      : studying
+                      ? 'Silüeti incele · $countdown saniye'
+                      : widget.mode == GameMode.minimalMoves
+                      ? 'Yanlış parçaları düzelt · Hedef: ${session.requiredMoves} hamle'
+                      : widget.mode == GameMode.memory
+                      ? 'Silüeti hafızandan tamamla.'
                       : 'Parçayı tut, silüetteki yerine sürükle.',
                   textAlign: TextAlign.center,
                 ),
@@ -190,7 +235,9 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final height = layout.height;
+                      final height = widget.mode == GameMode.minimalMoves
+                          ? 360.0
+                          : layout.height;
                       final availableHeight = constraints.maxHeight;
                       final boardWidth = constraints.maxWidth.clamp(
                         0.0,
@@ -201,7 +248,7 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
                         child: Listener(
                           key: const ValueKey('classic-board'),
                           behavior: HitTestBehavior.opaque,
-                          onPointerDown: session.complete
+                          onPointerDown: session.complete || studying
                               ? null
                               : (details) {
                                   final p = details.localPosition / scale;
@@ -252,7 +299,7 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
                           onPointerCancel: (_) => setState(() => active = null),
                           child: Semantics(
                             label:
-                                '${session.shape.name} silüeti. ${session.pieces.length} sürüklenebilir parça.',
+                                '${showTarget ? session.shape.name : 'Gizli'} silüeti. ${session.pieces.length} sürüklenebilir parça.',
                             child: CustomPaint(
                               size: Size(boardWidth, height * scale),
                               painter: _Board(
@@ -262,6 +309,7 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
                                 tray,
                                 glowPiece,
                                 snapGlow.isAnimating ? 1 - snapGlow.value : 0,
+                                showTarget,
                               ),
                             ),
                           ),
@@ -270,6 +318,15 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
                     },
                   ),
                 ),
+                if (widget.mode == GameMode.memory && !session.complete)
+                  TextButton(
+                    onPressed: studying || peeking ? null : peek,
+                    child: Text(
+                      peeking
+                          ? 'Silüet gösteriliyor…'
+                          : 'Tekrar bak · yıldız cezası (${session.peeks})',
+                    ),
+                  ),
                 if (!session.complete)
                   const Text(
                     'Parçalar gerçek boyutunda. Yaklaşınca yerine oturur.\nBu başlangıç serisinde döndürmen gerekmiyor.',
@@ -298,7 +355,9 @@ class _Board extends CustomPainter {
     this.tray,
     this.glowPiece,
     this.glow,
+    this.showTarget,
   );
+  final bool showTarget;
   final int? glowPiece;
   final double glow;
   final ClassicSession session;
@@ -317,14 +376,16 @@ class _Board extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.scale(size.width / 360);
     final house = session.shape.path;
-    canvas.drawPath(house, Paint()..color = const Color(0xFF25304B));
-    canvas.drawPath(
-      house,
-      Paint()
-        ..color = const Color(0xFF54627F)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
-    );
+    if (showTarget) {
+      canvas.drawPath(house, Paint()..color = const Color(0xFF25304B));
+      canvas.drawPath(
+        house,
+        Paint()
+          ..color = const Color(0xFF54627F)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
+      );
+    }
     if (glowPiece != null && glow > 0) {
       final target = session.placed[glowPiece];
       if (target != null) {

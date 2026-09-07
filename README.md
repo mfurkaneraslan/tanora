@@ -26,7 +26,7 @@ Android cihaz/emülatör için `flutter run`; iOS için macOS, Xcode ve iOS ara�
 
 Classic'te 30 farklı silüet vardır: ev, yelkenli, balık, dağ, uçurtma, ağaç, roket, kalp, yıldız, kedi, tavşan, kuş, kelebek, mum, kupa, şemsiye, taç, şimşek, bayrak, elmas, anahtar, çekiç, uçak, köprü, kale, mantar, lale, zarf, gemi ve robot. Silüetler önce üçgenlere ayrılır; çok küçük veya ince bölgeler komşularıyla birleşerek tutulabilir üçgen ve çokgen parçalar oluşturur. Parça sayısı zorla artırılmaz. Her parçanın alanı en az 500 mantıksal birim², 2×alan/çevre ölçüsü en az 12 mantıksal birimdir. Parçalar gerçek boyutunda kalır, tutuş noktası korunur. Snap sonrası click ve kısa parlama vardır.
 
-Tamamlanınca o denemenin yıldızlarını gösteren Tebrikler penceresi açılır. Seviyeler bölüm listesine, Devam et sonraki şekle götürür. Son bölümde seri tamamlandı mesajı ve Seviyeler gösterilir. En iyi yıldızlar yerel kayıtta korunur. Minimal Moves ve Memory henüz önizlemedir.
+Tamamlanınca o denemenin yıldızlarını gösteren Tebrikler penceresi açılır. Seviyeler bölüm listesine, Devam et sonraki şekle götürür. Son bölümde seri tamamlandı mesajı ve Seviyeler gösterilir. En iyi yıldızlar yerel kayıtta korunur. Minimal Hamle ve Hafıza artık oynanabilir. Minimal Hamle'de 2–7 parça başlangıçta yanlış yerde, kalanlar doğru yerde sabittir. Hedef hamle sayısı gösterilir; tam hedef 3 yıldız, en fazla 3 ek hamle 2, daha fazlası 1 yıldızdır. Hafıza'da hedef 3 saniye gösterilir, bu sırada giriş kapalıdır; sonra gizlenir. Tekrar bak 1 saniye gösterir ve sonuçtan bir yıldız düşürür (en az 1 yıldız). Her modun 30 seviyesi ve yerel ilerlemesi ayrıdır. Arayüz ve sistem kontrolleri Türkçedir.
 
 Önceki konuşmadan görsel ek alınamadığından tasarım metindeki koyu lacivert + canlı renkler tarifinden oluşturuldu. Çizimler Flutter CustomPainter ile üretilir; harici görsel/font indirme gerekmez. Mobil uygulama çalışma sırasında ağ servisine ihtiyaç duymaz. Web önizlemesinin ilk yüklenmesi sunucu gerektirir; PWA/offline web desteği bu kapsamda değildir.
 
@@ -58,7 +58,7 @@ flutter test
 flutter build web --release
 ```
 
-10 test geçti; Classic geometri bütünlüğü, 30 bölümün çözülebilirliği, yanlış bırakma ve gerçek sürüklemeyle tamamlama da doğrulandı. Önceki kontroller: kayıt tekrar yükleme, mod izolasyonu, en iyi skorun korunması, kilitli bölüme erişim reddi, bozuk/yazılamayan kayıt, her üç modun ileri/geri gezinmesi ve 320 px ekranda büyütülmüş yazı. Tarayıcıda 390 × 844 boyutunda ana menü ve bölüm ekranı görsel olarak kontrol edildi.
+15 test geçti; Classic geometri bütünlüğü, 30 bölümün çözülebilirliği, yanlış bırakma ve gerçek sürüklemeyle tamamlama da doğrulandı. Önceki kontroller: kayıt tekrar yükleme, mod izolasyonu, en iyi skorun korunması, kilitli bölüme erişim reddi, bozuk/yazılamayan kayıt, her üç modun ileri/geri gezinmesi ve 320 px ekranda büyütülmüş yazı. Tarayıcıda 390 × 844 boyutunda ana menü ve bölüm ekranı görsel olarak kontrol edildi.
 
 Yerel kayıt için SharedPreferencesAsync kullanılır: https://pub.dev/documentation/shared_preferences/latest/shared_preferences/SharedPreferencesAsync-class.html . Uygulama kaldırılması veya tarayıcı verilerinin temizlenmesi ilerlemeyi silebilir; cihazlar arası senkronizasyon yoktur.
 

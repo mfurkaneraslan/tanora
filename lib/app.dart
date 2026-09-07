@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'data/progress_store.dart';
 import 'screens/home_screen.dart';
@@ -9,6 +10,9 @@ class TanoraApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'TANORA',
+    locale: const Locale('tr'),
+    supportedLocales: const [Locale('tr')],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
       useMaterial3: true,
