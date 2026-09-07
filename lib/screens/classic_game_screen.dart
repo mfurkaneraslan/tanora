@@ -4,6 +4,7 @@ import '../data/progress_store.dart';
 import '../models/classic_puzzle.dart';
 import '../models/game_mode.dart';
 import '../widgets/tangram_play.dart';
+import '../services/snap_sound.dart';
 
 class ClassicGameScreen extends StatefulWidget {
   const ClassicGameScreen({
@@ -17,7 +18,10 @@ class ClassicGameScreen extends StatefulWidget {
   State<ClassicGameScreen> createState() => _ClassicGameScreenState();
 }
 
-class _ClassicGameScreenState extends State<ClassicGameScreen> {
+class _ClassicGameScreenState extends State<ClassicGameScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController snapGlow;
+  int? glowPiece;
   late ClassicSession session;
   late PieceTray layout;
   Offset grabOffset = Offset.zero;
@@ -27,8 +31,21 @@ class _ClassicGameScreenState extends State<ClassicGameScreen> {
   @override
   void initState() {
     super.initState();
+    snapGlow =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 360),
+        )..addListener(() {
+          setState(() {});
+        });
     session = ClassicSession(widget.level);
     layout = PieceTray(session.pieces);
+  }
+
+  @override
+  void dispose() {
+    snapGlow.dispose();
+    super.dispose();
   }
 
   Offset tray(int i) => layout.centers[i];
@@ -132,7 +149,12 @@ class _ClassicGameScreenState extends State<ClassicGameScreen> {
                           onPointerUp: (_) {
                             if (active == null) return;
                             setState(() {
-                              session.drop(active!, drag);
+                              final piece = active!;
+                              if (session.drop(piece, drag)) {
+                                glowPiece = piece;
+                                snapGlow.forward(from: 0);
+                                playSnapSound();
+                              }
                               active = null;
                             });
                             if (session.complete) finish();
@@ -143,7 +165,14 @@ class _ClassicGameScreenState extends State<ClassicGameScreen> {
                                 'Ev silüeti. ${session.pieces.length} sürüklenebilir üçgen.',
                             child: CustomPaint(
                               size: Size(boardWidth, height * scale),
-                              painter: _Board(session, active, drag, tray),
+                              painter: _Board(
+                                session,
+                                active,
+                                drag,
+                                tray,
+                                glowPiece,
+                                snapGlow.isAnimating ? 1 - snapGlow.value : 0,
+                              ),
                             ),
                           ),
                         ),
@@ -217,7 +246,16 @@ class _ClassicGameScreenState extends State<ClassicGameScreen> {
 }
 
 class _Board extends CustomPainter {
-  _Board(this.session, this.active, this.drag, this.tray);
+  _Board(
+    this.session,
+    this.active,
+    this.drag,
+    this.tray,
+    this.glowPiece,
+    this.glow,
+  );
+  final int? glowPiece;
+  final double glow;
   final ClassicSession session;
   final int? active;
   final Offset drag;
@@ -248,6 +286,23 @@ class _Board extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
     );
+    if (glowPiece != null && glow > 0) {
+      final target = session.placed[glowPiece];
+      if (target != null) {
+        final outline = Path()
+          ..addPolygon(session.pieces[target].vertices, true);
+        canvas.drawPath(
+          outline,
+          Paint()
+            ..color = colors[glowPiece! % colors.length].withValues(
+              alpha: glow * .65,
+            )
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 9
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 9),
+        );
+      }
+    }
     for (var i = 0; i < session.pieces.length; i++) {
       if (i == active) continue;
       final target = session.placed[i];
