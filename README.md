@@ -24,7 +24,7 @@ Android cihaz/emülatör için `flutter run`; iOS için macOS, Xcode ve iOS ara�
 - Kayıt okuma/yazma hatasında açıklama gösterilir; uygulama açık kalır.
 - Daily, hesap, backend, uzaktan kayıt ve database yok.
 
-Classic artık oynanabilir: ilk ev silüeti 3 üçgenle tamamlanır. Sonraki bölümlerde aynı silüetin en büyük üçgeni ikiye bölünür; bölüm 2'de 4, bölüm 30'da 32 parça vardır. Parçalar alttaki tepsiden sürüklenir, tutulunca gerçek boyutuna gelir ve hedefe 22 mantıksal piksel yaklaşınca oturur. Yanlış bırakılan parça tepsiye döner. Bu başlangıç serisinde döndürme yoktur.
+Classic artık oynanabilir: ilk ev silüeti 3 üçgenle tamamlanır. Sonraki bölümlerde aynı silüetin en büyük üçgeni ikiye bölünür; bölüm 2'de 4, bölüm 30'da 32 parça vardır. Parçalar alttaki tepsiden sürüklenir, tepside de hedefle aynı boyuttadır ve tutulunca boyutu değişmez ve hedefe 22 mantıksal piksel yaklaşınca oturur. Yanlış bırakılan parça tepsiye döner. Bu başlangıç serisinde döndürme yoktur.
 
 Tüm parçalar yerleşince sonuç yerel kayda yazılır: hatasız 3 yıldız, en fazla 3 ek hamle 2 yıldız, daha fazlası 1 yıldız. Sonraki bölüm açılır. Minimal Moves ve Memory henüz önizlemedir. Gezinme düğmelerinde tangram üçgeni kullanılır.
 

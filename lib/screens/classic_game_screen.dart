@@ -19,6 +19,8 @@ class ClassicGameScreen extends StatefulWidget {
 
 class _ClassicGameScreenState extends State<ClassicGameScreen> {
   late ClassicSession session;
+  late PieceTray layout;
+  Offset grabOffset = Offset.zero;
   int? active;
   Offset drag = Offset.zero;
   bool saving = false;
@@ -26,23 +28,10 @@ class _ClassicGameScreenState extends State<ClassicGameScreen> {
   void initState() {
     super.initState();
     session = ClassicSession(widget.level);
+    layout = PieceTray(session.pieces);
   }
 
-  Offset tray(int i) {
-    final columns = session.pieces.length <= 3 ? 3 : 5;
-    return Offset(
-      (i % columns + .5) * 360 / columns,
-      365 + (i ~/ columns) * 48,
-    );
-  }
-
-  double trayScale(int i) {
-    final points = session.pieces[i].local;
-    final bounds = Path()..addPolygon(points, true);
-    final rect = bounds.getBounds();
-    final width = session.pieces.length <= 3 ? 84.0 : 52.0;
-    return (width / rect.width).clamp(0.0, 1.0).clamp(0.0, 38 / rect.height);
-  }
+  Offset tray(int i) => layout.centers[i];
 
   Future<void> finish() async {
     setState(() => saving = true);
@@ -95,54 +84,72 @@ class _ClassicGameScreenState extends State<ClassicGameScreen> {
               const SizedBox(height: 12),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final scale = constraints.maxWidth / 360;
-                  final height =
-                      405.0 +
-                      ((session.pieces.length - 1) ~/
-                              (session.pieces.length <= 3 ? 3 : 5)) *
-                          48;
-                  return Listener(
-                    key: const ValueKey('classic-board'),
-                    behavior: HitTestBehavior.opaque,
-                    onPointerDown: session.complete
-                        ? null
-                        : (details) {
-                            final p = details.localPosition / scale;
-                            for (
-                              var i = session.pieces.length - 1;
-                              i >= 0;
-                              i--
-                            ) {
-                              if (session.placed.containsKey(i)) continue;
-                              if ((p - tray(i)).distance < 32) {
-                                setState(() {
-                                  active = i;
-                                  drag = p;
-                                });
-                                break;
+                  final height = layout.height;
+                  final availableHeight =
+                      (MediaQuery.sizeOf(context).height - 260).clamp(
+                        300.0,
+                        900.0,
+                      );
+                  final boardWidth = constraints.maxWidth.clamp(
+                    0.0,
+                    availableHeight / height * 360,
+                  );
+                  final scale = boardWidth / 360;
+                  return Center(
+                    child: Listener(
+                      key: const ValueKey('classic-board'),
+                      behavior: HitTestBehavior.opaque,
+                      onPointerDown: session.complete
+                          ? null
+                          : (details) {
+                              final p = details.localPosition / scale;
+                              for (
+                                var i = session.pieces.length - 1;
+                                i >= 0;
+                                i--
+                              ) {
+                                if (session.placed.containsKey(i)) continue;
+                                final shape = Path()
+                                  ..addPolygon(
+                                    session.pieces[i].local
+                                        .map((v) => v + tray(i))
+                                        .toList(),
+                                    true,
+                                  );
+                                if (shape.contains(p)) {
+                                  setState(() {
+                                    active = i;
+                                    grabOffset = p - tray(i);
+                                    drag = tray(i);
+                                  });
+                                  break;
+                                }
                               }
-                            }
-                          },
-                    onPointerMove: (details) {
-                      if (active != null) {
-                        setState(() => drag = details.localPosition / scale);
-                      }
-                    },
-                    onPointerUp: (_) {
-                      if (active == null) return;
-                      setState(() {
-                        session.drop(active!, drag);
-                        active = null;
-                      });
-                      if (session.complete) finish();
-                    },
-                    onPointerCancel: (_) => setState(() => active = null),
-                    child: Semantics(
-                      label:
-                          'Ev silüeti. ${session.pieces.length} sürüklenebilir üçgen.',
-                      child: CustomPaint(
-                        size: Size(constraints.maxWidth, height * scale),
-                        painter: _Board(session, active, drag, tray, trayScale),
+                            },
+                      onPointerMove: (details) {
+                        if (active != null) {
+                          setState(
+                            () => drag =
+                                details.localPosition / scale - grabOffset,
+                          );
+                        }
+                      },
+                      onPointerUp: (_) {
+                        if (active == null) return;
+                        setState(() {
+                          session.drop(active!, drag);
+                          active = null;
+                        });
+                        if (session.complete) finish();
+                      },
+                      onPointerCancel: (_) => setState(() => active = null),
+                      child: Semantics(
+                        label:
+                            'Ev silüeti. ${session.pieces.length} sürüklenebilir üçgen.',
+                        child: CustomPaint(
+                          size: Size(boardWidth, height * scale),
+                          painter: _Board(session, active, drag, tray),
+                        ),
                       ),
                     ),
                   );
@@ -150,7 +157,7 @@ class _ClassicGameScreenState extends State<ClassicGameScreen> {
               ),
               if (!session.complete)
                 const Text(
-                  'Parçalar tutulunca büyür. Yaklaşınca yerine oturur.\nBu başlangıç serisinde döndürmen gerekmiyor.',
+                  'Parçalar gerçek boyutunda. Yaklaşınca yerine oturur.\nBu başlangıç serisinde döndürmen gerekmiyor.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 12),
                 ),
@@ -213,12 +220,11 @@ class _ClassicGameScreenState extends State<ClassicGameScreen> {
 }
 
 class _Board extends CustomPainter {
-  _Board(this.session, this.active, this.drag, this.tray, this.trayScale);
+  _Board(this.session, this.active, this.drag, this.tray);
   final ClassicSession session;
   final int? active;
   final Offset drag;
   final Offset Function(int) tray;
-  final double Function(int) trayScale;
   static const colors = [
     Color(0xFF60DDC2),
     Color(0xFF6B9EFF),
@@ -252,7 +258,7 @@ class _Board extends CustomPainter {
         canvas,
         i,
         target == null ? tray(i) : session.pieces[target].center,
-        target == null ? trayScale(i) : 1,
+        1,
       );
     }
     if (active != null) drawPiece(canvas, active!, drag, 1);

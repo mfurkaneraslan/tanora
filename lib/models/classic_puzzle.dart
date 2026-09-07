@@ -78,3 +78,24 @@ class ClassicSession {
     return false;
   }
 }
+
+/// Shelf packing preserves each piece's exact target dimensions.
+class PieceTray {
+  PieceTray(List<PuzzlePiece> pieces) {
+    var x = 12.0, y = 320.0, rowHeight = 0.0;
+    for (final piece in pieces) {
+      final bounds = (Path()..addPolygon(piece.local, true)).getBounds();
+      if (x + bounds.width > 348) {
+        x = 12;
+        y += rowHeight + 16;
+        rowHeight = 0;
+      }
+      centers.add(Offset(x - bounds.left, y - bounds.top));
+      x += bounds.width + 16;
+      if (bounds.height > rowHeight) rowHeight = bounds.height;
+    }
+    height = y + rowHeight + 16;
+  }
+  final List<Offset> centers = [];
+  late final double height;
+}

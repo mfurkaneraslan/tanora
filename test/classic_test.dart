@@ -57,7 +57,7 @@ void main() {
       final scale = tester.getSize(board).width / 360;
       final pieces = classicPieces(1);
       for (var i = 0; i < 3; i++) {
-        final start = origin + Offset((i + .5) * 120, 365) * scale;
+        final start = origin + PieceTray(pieces).centers[i] * scale;
         final gesture = await tester.startGesture(start);
         await gesture.moveBy(const Offset(0, -20));
         await tester.pump();
@@ -71,7 +71,7 @@ void main() {
       final restored = ProgressStore(preferences: prefs);
       await restored.load();
       expect(restored.unlocked(GameMode.classic, 2), isTrue);
-      await tester.ensureVisible(find.text('Sonraki bölüm · 4 parça'));
+      await tester.scrollUntilVisible(find.text('Sonraki bölüm · 4 parça'), 150);
       await tester.tap(find.text('Sonraki bölüm · 4 parça'));
       await tester.pumpAndSettle();
       expect(find.text('0 / 4 parça  ·  0 hamle'), findsOneWidget);
