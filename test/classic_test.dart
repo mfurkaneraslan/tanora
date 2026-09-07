@@ -15,7 +15,19 @@ void main() {
       final outlines = <String>{};
       for (var level = 1; level <= 30; level++) {
         final pieces = classicPieces(level);
-        expect(pieces.length, greaterThanOrEqualTo(level + 2));
+        expect(pieces.length, greaterThanOrEqualTo(2));
+        for (final piece in pieces) {
+          expect(
+            piece.area,
+            greaterThanOrEqualTo(500),
+            reason: 'Bölüm $level küçük parça',
+          );
+          expect(
+            piece.thickness,
+            greaterThanOrEqualTo(12),
+            reason: 'Bölüm $level ince parça',
+          );
+        }
         names.add(classicShapes[level - 1].name);
         outlines.add(classicShapes[level - 1].points.toString());
         expect(

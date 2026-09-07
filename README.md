@@ -24,7 +24,7 @@ Android cihaz/emülatör için `flutter run`; iOS için macOS, Xcode ve iOS ara�
 - Kayıt okuma/yazma hatasında açıklama gösterilir; uygulama açık kalır.
 - Daily, hesap, backend, uzaktan kayıt ve database yok.
 
-Classic'te 30 farklı silüet vardır: ev, yelkenli, balık, dağ, uçurtma, ağaç, roket, kalp, yıldız, kedi, tavşan, kuş, kelebek, mum, kupa, şemsiye, taç, şimşek, bayrak, elmas, anahtar, çekiç, uçak, köprü, kale, mantar, lale, zarf, gemi ve robot. Çokgenler üçgenlere ayrılır; ileri bölümlerde büyük üçgenler bölünerek parça sayısı artırılır. Parçalar gerçek boyutunda kalır, tutuş noktası korunur. Snap sonrası click ve kısa parlama vardır.
+Classic'te 30 farklı silüet vardır: ev, yelkenli, balık, dağ, uçurtma, ağaç, roket, kalp, yıldız, kedi, tavşan, kuş, kelebek, mum, kupa, şemsiye, taç, şimşek, bayrak, elmas, anahtar, çekiç, uçak, köprü, kale, mantar, lale, zarf, gemi ve robot. Silüetler önce üçgenlere ayrılır; çok küçük veya ince bölgeler komşularıyla birleşerek tutulabilir üçgen ve çokgen parçalar oluşturur. Parça sayısı zorla artırılmaz. Her parçanın alanı en az 500 mantıksal birim², 2×alan/çevre ölçüsü en az 12 mantıksal birimdir. Parçalar gerçek boyutunda kalır, tutuş noktası korunur. Snap sonrası click ve kısa parlama vardır.
 
 Tamamlanınca o denemenin yıldızlarını gösteren Tebrikler penceresi açılır. Seviyeler bölüm listesine, Devam et sonraki şekle götürür. Son bölümde seri tamamlandı mesajı ve Seviyeler gösterilir. En iyi yıldızlar yerel kayıtta korunur. Minimal Moves ve Memory henüz önizlemedir.
 

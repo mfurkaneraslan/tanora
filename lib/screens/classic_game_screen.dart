@@ -252,7 +252,7 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
                           onPointerCancel: (_) => setState(() => active = null),
                           child: Semantics(
                             label:
-                                '${session.shape.name} silüeti. ${session.pieces.length} sürüklenebilir üçgen.',
+                                '${session.shape.name} silüeti. ${session.pieces.length} sürüklenebilir parça.',
                             child: CustomPaint(
                               size: Size(boardWidth, height * scale),
                               painter: _Board(
