@@ -11,22 +11,25 @@ void main() {
   test(
     'All 30 partitions preserve the silhouette area and increase piece count',
     () {
-      var previousMax = double.infinity;
+      final names = <String>{};
+      final outlines = <String>{};
       for (var level = 1; level <= 30; level++) {
         final pieces = classicPieces(level);
-        expect(pieces.length, level + 2);
-        expect(pieces.fold(0.0, (sum, p) => sum + p.area), closeTo(32000, .01));
-        final largest = pieces
-            .map((p) => p.area)
-            .reduce((a, b) => a > b ? a : b);
-        expect(largest <= previousMax, isTrue);
-        previousMax = largest;
+        expect(pieces.length, greaterThanOrEqualTo(level + 2));
+        names.add(classicShapes[level - 1].name);
+        outlines.add(classicShapes[level - 1].points.toString());
+        expect(
+          pieces.fold(0.0, (sum, p) => sum + p.area),
+          closeTo(polygonArea(classicShapes[level - 1].points).abs(), .01),
+        );
         final session = ClassicSession(level);
         for (var i = 0; i < pieces.length; i++) {
           expect(session.drop(i, pieces[i].center), isTrue);
         }
         expect(session.complete, isTrue);
       }
+      expect(names.length, 30);
+      expect(outlines.length, 30);
     },
   );
   test(
@@ -40,9 +43,8 @@ void main() {
       expect(session.moves, 2);
     },
   );
-  testWidgets(
-    'Dragging all three pieces saves completion and opens the four-piece level',
-    (tester) async {
+  for (final continueNext in [true, false]) {
+    testWidgets('Completion dialog action: $continueNext', (tester) async {
       tester.view.physicalSize = const Size(390, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
@@ -66,19 +68,20 @@ void main() {
         await gesture.up();
         await tester.pumpAndSettle();
       }
-      expect(find.text('Bölüm tamamlandı'), findsOneWidget);
+      expect(find.text('Tebrikler!'), findsOneWidget);
+      expect(find.byType(AlertDialog), findsOneWidget);
       expect(store.stars(GameMode.classic, 1), 3);
       final restored = ProgressStore(preferences: prefs);
       await restored.load();
       expect(restored.unlocked(GameMode.classic, 2), isTrue);
+      expect(find.text('Devam et').hitTestable(), findsOneWidget);
+      await tester.tap(find.text(continueNext ? 'Devam et' : 'Seviyeler'));
+      await tester.pumpAndSettle();
       expect(
-        find.text('Sonraki bölüm · 4 parça').hitTestable(),
+        find.text(continueNext ? 'Yelkenli' : 'BAŞLANGIÇ'),
         findsOneWidget,
       );
-      await tester.tap(find.text('Sonraki bölüm · 4 parça'));
-      await tester.pumpAndSettle();
-      expect(find.text('0 / 4 parça  ·  0 hamle'), findsOneWidget);
       expect(tester.takeException(), isNull);
-    },
-  );
+    });
+  }
 }

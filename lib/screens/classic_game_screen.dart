@@ -5,6 +5,7 @@ import '../models/classic_puzzle.dart';
 import '../models/game_mode.dart';
 import '../widgets/tangram_play.dart';
 import '../services/snap_sound.dart';
+import 'level_select_screen.dart';
 
 class ClassicGameScreen extends StatefulWidget {
   const ClassicGameScreen({
@@ -53,16 +54,105 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
   Future<void> finish() async {
     setState(() => saving = true);
     final extra = session.moves - session.pieces.length;
-    await widget.progress.complete(
-      GameMode.classic,
-      widget.level,
-      extra == 0
-          ? 3
-          : extra <= 3
-          ? 2
-          : 1,
+    final score = extra == 0
+        ? 3
+        : extra <= 3
+        ? 2
+        : 1;
+    await widget.progress.complete(GameMode.classic, widget.level, score);
+    if (!mounted) return;
+    setState(() => saving = false);
+    final next = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          backgroundColor: const Color(0xFF161F37),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          title: const Text('Tebrikler!', textAlign: TextAlign.center),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    3,
+                    (i) => Flexible(
+                      child: Icon(
+                        i < score
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
+                        size: 52,
+                        color: i < score
+                            ? const Color(0xFFFFD879)
+                            : const Color(0xFF56617D),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '${session.shape.name} tamamlandı',
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  '${session.moves} hamle · $score / 3 yıldız',
+                  textAlign: TextAlign.center,
+                ),
+                if (widget.level == 30)
+                  const Text(
+                    'Classic serisini bitirdin!',
+                    textAlign: TextAlign.center,
+                  ),
+                if (widget.progress.error != null)
+                  Text(widget.progress.error!, textAlign: TextAlign.center),
+              ],
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Seviyeler'),
+            ),
+            if (widget.level < 30)
+              FilledButton.icon(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                icon: const TangramPlay(color: Color(0xFF0C1226)),
+                label: const Text('Devam et'),
+              ),
+          ],
+        ),
+      ),
     );
-    if (mounted) setState(() => saving = false);
+    if (!mounted) return;
+    if (next == true) {
+      await widget.progress.select(GameMode.classic, widget.level + 1);
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => ClassicGameScreen(
+            level: widget.level + 1,
+            progress: widget.progress,
+          ),
+        ),
+      );
+    } else {
+      final navigator = Navigator.of(context);
+      navigator.popUntil((route) => route.isFirst);
+      navigator.push(
+        MaterialPageRoute<void>(
+          builder: (_) => LevelSelectScreen(
+            mode: GameMode.classic,
+            progress: widget.progress,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -79,8 +169,8 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Column(
               children: [
-                const Text(
-                  'Eve hoş geldin',
+                Text(
+                  session.shape.name,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold),
                 ),
@@ -162,7 +252,7 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
                           onPointerCancel: (_) => setState(() => active = null),
                           child: Semantics(
                             label:
-                                'Ev silüeti. ${session.pieces.length} sürüklenebilir üçgen.',
+                                '${session.shape.name} silüeti. ${session.pieces.length} sürüklenebilir üçgen.',
                             child: CustomPaint(
                               size: Size(boardWidth, height * scale),
                               painter: _Board(
@@ -186,56 +276,11 @@ class _ClassicGameScreenState extends State<ClassicGameScreen>
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12),
                   ),
-                if (session.complete) ...[
-                  Text(
-                    'Bölüm tamamlandı',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: GameMode.classic.color,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    saving
-                        ? 'Kaydediliyor…'
-                        : '${widget.progress.stars(GameMode.classic, widget.level)} / 3 yıldız',
+                if (session.complete)
+                  const Text(
+                    'Bütün parçalar yerini buldu.',
                     textAlign: TextAlign.center,
                   ),
-                  if (widget.progress.error != null)
-                    Text(widget.progress.error!, textAlign: TextAlign.center),
-                  const SizedBox(height: 12),
-                  FilledButton.icon(
-                    onPressed: saving
-                        ? null
-                        : () async {
-                            if (widget.level == 30) {
-                              Navigator.of(context).pop();
-                              return;
-                            }
-                            await widget.progress.select(
-                              GameMode.classic,
-                              widget.level + 1,
-                            );
-                            if (!context.mounted) return;
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute<void>(
-                                builder: (_) => ClassicGameScreen(
-                                  level: widget.level + 1,
-                                  progress: widget.progress,
-                                ),
-                              ),
-                            );
-                          },
-                    icon: const TangramPlay(color: Color(0xFF0C1226)),
-                    label: Text(
-                      widget.level == 30
-                          ? 'Bölümlere dön'
-                          : 'Sonraki bölüm · ${session.pieces.length + 1} parça',
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
@@ -271,13 +316,7 @@ class _Board extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.scale(size.width / 360);
-    final house = Path()
-      ..moveTo(180, 40)
-      ..lineTo(260, 120)
-      ..lineTo(260, 280)
-      ..lineTo(100, 280)
-      ..lineTo(100, 120)
-      ..close();
+    final house = session.shape.path;
     canvas.drawPath(house, Paint()..color = const Color(0xFF25304B));
     canvas.drawPath(
       house,

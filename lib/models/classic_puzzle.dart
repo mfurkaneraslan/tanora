@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'classic_shapes.dart';
+export 'classic_shapes.dart';
+
 class PuzzlePiece {
   PuzzlePiece(this.vertices);
   final List<Offset> vertices;
@@ -13,26 +16,27 @@ class PuzzlePiece {
       2;
 }
 
-/// A house partitioned into progressively smaller triangles, with no gaps.
 List<PuzzlePiece> classicPieces(int level) {
   if (level < 1 || level > 30) throw RangeError.range(level, 1, 30);
-  final pieces = [
-    PuzzlePiece([
-      const Offset(180, 40),
-      const Offset(100, 120),
-      const Offset(260, 120),
-    ]),
-    PuzzlePiece([
-      const Offset(100, 120),
-      const Offset(260, 120),
-      const Offset(100, 280),
-    ]),
-    PuzzlePiece([
-      const Offset(260, 120),
-      const Offset(260, 280),
-      const Offset(100, 280),
-    ]),
-  ];
+  final pieces = level == 1
+      ? [
+          PuzzlePiece([
+            const Offset(180, 40),
+            const Offset(100, 120),
+            const Offset(260, 120),
+          ]),
+          PuzzlePiece([
+            const Offset(100, 120),
+            const Offset(260, 120),
+            const Offset(100, 280),
+          ]),
+          PuzzlePiece([
+            const Offset(260, 120),
+            const Offset(260, 280),
+            const Offset(100, 280),
+          ]),
+        ]
+      : triangulate(classicShapes[level - 1].points);
   while (pieces.length < level + 2) {
     pieces.sort((a, b) => b.area.compareTo(a.area));
     final triangle = pieces.removeAt(0).vertices;
@@ -56,7 +60,9 @@ List<PuzzlePiece> classicPieces(int level) {
 }
 
 class ClassicSession {
-  ClassicSession(int level) : pieces = classicPieces(level);
+  ClassicSession(this.level) : pieces = classicPieces(level);
+  final int level;
+  ClassicShape get shape => classicShapes[level - 1];
   final List<PuzzlePiece> pieces;
   final Map<int, int> placed = {};
   int moves = 0;

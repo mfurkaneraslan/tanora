@@ -24,9 +24,9 @@ Android cihaz/emülatör için `flutter run`; iOS için macOS, Xcode ve iOS ara�
 - Kayıt okuma/yazma hatasında açıklama gösterilir; uygulama açık kalır.
 - Daily, hesap, backend, uzaktan kayıt ve database yok.
 
-Classic artık oynanabilir: ilk ev silüeti 3 üçgenle tamamlanır. Sonraki bölümlerde aynı silüetin en büyük üçgeni ikiye bölünür; bölüm 2'de 4, bölüm 30'da 32 parça vardır. Parçalar alttaki tepsiden sürüklenir, tepside de hedefle aynı boyuttadır ve tutulunca boyutu değişmez ve hedefe 22 mantıksal piksel yaklaşınca oturur. Yanlış bırakılan parça tepsiye döner. Bu başlangıç serisinde döndürme yoktur.
+Classic'te 30 farklı silüet vardır: ev, yelkenli, balık, dağ, uçurtma, ağaç, roket, kalp, yıldız, kedi, tavşan, kuş, kelebek, mum, kupa, şemsiye, taç, şimşek, bayrak, elmas, anahtar, çekiç, uçak, köprü, kale, mantar, lale, zarf, gemi ve robot. Çokgenler üçgenlere ayrılır; ileri bölümlerde büyük üçgenler bölünerek parça sayısı artırılır. Parçalar gerçek boyutunda kalır, tutuş noktası korunur. Snap sonrası click ve kısa parlama vardır.
 
-Tüm parçalar yerleşince sonuç yerel kayda yazılır: hatasız 3 yıldız, en fazla 3 ek hamle 2 yıldız, daha fazlası 1 yıldız. Sonraki bölüm açılır. Minimal Moves ve Memory henüz önizlemedir. Gezinme düğmelerinde tangram üçgeni kullanılır.
+Tamamlanınca o denemenin yıldızlarını gösteren Tebrikler penceresi açılır. Seviyeler bölüm listesine, Devam et sonraki şekle götürür. Son bölümde seri tamamlandı mesajı ve Seviyeler gösterilir. En iyi yıldızlar yerel kayıtta korunur. Minimal Moves ve Memory henüz önizlemedir.
 
 Önceki konuşmadan görsel ek alınamadığından tasarım metindeki koyu lacivert + canlı renkler tarifinden oluşturuldu. Çizimler Flutter CustomPainter ile üretilir; harici görsel/font indirme gerekmez. Mobil uygulama çalışma sırasında ağ servisine ihtiyaç duymaz. Web önizlemesinin ilk yüklenmesi sunucu gerektirir; PWA/offline web desteği bu kapsamda değildir.
 
@@ -58,13 +58,13 @@ flutter test
 flutter build web --release
 ```
 
-9 test geçti; Classic geometri bütünlüğü, 30 bölümün çözülebilirliği, yanlış bırakma ve gerçek sürüklemeyle tamamlama da doğrulandı. Önceki kontroller: kayıt tekrar yükleme, mod izolasyonu, en iyi skorun korunması, kilitli bölüme erişim reddi, bozuk/yazılamayan kayıt, her üç modun ileri/geri gezinmesi ve 320 px ekranda büyütülmüş yazı. Tarayıcıda 390 × 844 boyutunda ana menü ve bölüm ekranı görsel olarak kontrol edildi.
+10 test geçti; Classic geometri bütünlüğü, 30 bölümün çözülebilirliği, yanlış bırakma ve gerçek sürüklemeyle tamamlama da doğrulandı. Önceki kontroller: kayıt tekrar yükleme, mod izolasyonu, en iyi skorun korunması, kilitli bölüme erişim reddi, bozuk/yazılamayan kayıt, her üç modun ileri/geri gezinmesi ve 320 px ekranda büyütülmüş yazı. Tarayıcıda 390 × 844 boyutunda ana menü ve bölüm ekranı görsel olarak kontrol edildi.
 
 Yerel kayıt için SharedPreferencesAsync kullanılır: https://pub.dev/documentation/shared_preferences/latest/shared_preferences/SharedPreferencesAsync-class.html . Uygulama kaldırılması veya tarayıcı verilerinin temizlenmesi ilerlemeyi silebilir; cihazlar arası senkronizasyon yoktur.
 
 ## Sonraki aşama
 
-Yeni silüetler, isteğe bağlı döndürme ve Minimal Moves / Memory oyun mekanikleri.
+Silüet tasarımlarının geliştirilmesi, isteğe bağlı döndürme ve Minimal Moves / Memory oyun mekanikleri.
 
 ## GitHub Pages
 

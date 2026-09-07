@@ -70,9 +70,7 @@ void main() {
       await tester.tap(find.text('01'));
       await tester.pumpAndSettle();
       expect(
-        find.text(
-          mode == GameMode.classic ? 'Eve hoş geldin' : 'Oyun alanı önizlemesi',
-        ),
+        find.text(mode == GameMode.classic ? 'Ev' : 'Oyun alanı önizlemesi'),
         findsOneWidget,
       );
       expect(store.lastMode, mode);
